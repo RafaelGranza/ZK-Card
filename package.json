@@ -1,0 +1,12 @@
+{
+  "name": "zk-card",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@10.33.0",
+  "scripts": {
+    "compile": "pnpm --filter contracts compile",
+    "test": "pnpm --filter contracts test",
+    "dev": "pnpm --filter ui dev",
+    "build": "pnpm --filter ui build"
+  }
+}
