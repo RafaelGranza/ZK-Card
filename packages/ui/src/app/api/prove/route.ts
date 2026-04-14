@@ -17,7 +17,7 @@
 
 import { NextResponse } from "next/server";
 import { getContract } from "@/lib/contract";
-import { getSandboxAccountAddress } from "@/lib/aztec";
+import { getUserAddress } from "@/lib/aztec";
 
 export async function POST(request: Request) {
   try {
@@ -28,7 +28,7 @@ export async function POST(request: Request) {
     }
 
     const contract = getContract();
-    const accountAddr = await getSandboxAccountAddress();
+    const accountAddr = await getUserAddress();
 
     // Simulate the private prove_card_ownership function.
     // The circuit runs locally in the PXE with the private witness (CardNote).

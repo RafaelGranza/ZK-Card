@@ -21,6 +21,8 @@ export type ConnectionStatus =
   | "connected"
   | "error";
 
+export type AztecRole = "bank" | "user";
+
 export interface IssueCardParams {
   holderAddress: string;
   cardNumberHash: string; // hex BigInt string
@@ -31,7 +33,10 @@ export interface IssueCardParams {
 
 export interface AztecState {
   status: ConnectionStatus;
+  /** Address for this role (bank or user) */
   address: string | null;
+  /** The other account's address — bank sees user address, user sees bank address */
+  peerAddress: string | null;
   contractAddress: string | null;
   cards: CardNoteData[];
   isLoading: boolean;
@@ -54,9 +59,10 @@ async function api<T>(path: string, options?: RequestInit): Promise<T> {
   return data as T;
 }
 
-export function useAztec(): AztecState {
+export function useAztec(role: AztecRole = "bank"): AztecState {
   const [status, setStatus] = useState<ConnectionStatus>("disconnected");
   const [address, setAddress] = useState<string | null>(null);
+  const [peerAddress, setPeerAddress] = useState<string | null>(null);
   const [contractAddress, setContractAddress] = useState<string | null>(null);
   const [cards, setCards] = useState<CardNoteData[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -82,15 +88,23 @@ export function useAztec(): AztecState {
   const connect = useCallback(async () => {
     setStatus("connecting");
     try {
-      const { address: addr } = await withLoading(() =>
-        api<{ address: string }>("/api/connect", { method: "POST" })
+      const { bankAddress, userAddress } = await withLoading(() =>
+        api<{ bankAddress: string; userAddress: string }>("/api/connect", {
+          method: "POST",
+        })
       );
-      setAddress(addr);
+      if (role === "bank") {
+        setAddress(bankAddress);
+        setPeerAddress(userAddress);
+      } else {
+        setAddress(userAddress);
+        setPeerAddress(bankAddress);
+      }
       setStatus("connected");
     } catch {
       setStatus("error");
     }
-  }, [withLoading]);
+  }, [role, withLoading]);
 
   const deployContract = useCallback(async () => {
     const { contractAddress: addr } = await withLoading(() =>
@@ -151,6 +165,7 @@ export function useAztec(): AztecState {
   return {
     status,
     address,
+    peerAddress,
     contractAddress,
     cards,
     isLoading,

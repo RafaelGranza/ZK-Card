@@ -21,7 +21,8 @@ import type { IssueCardParams } from "@/hooks/useAztec";
 interface IssueCardFormProps {
   onIssue: (params: IssueCardParams) => Promise<void>;
   isLoading: boolean;
-  issuerAddress?: string; // the bank (current wallet)
+  issuerAddress?: string;
+  defaultHolderAddress?: string;
 }
 
 // BN254 Fr modulus — Noir's Field type must be < this value.
@@ -44,8 +45,9 @@ export function IssueCardForm({
   onIssue,
   isLoading,
   issuerAddress,
+  defaultHolderAddress = "",
 }: IssueCardFormProps) {
-  const [holderAddr, setHolderAddr] = useState("");
+  const [holderAddr, setHolderAddr] = useState(defaultHolderAddress);
   const [cardNumber, setCardNumber] = useState("4532 0151 1283 0366");
   const [expiryYear, setExpiryYear] = useState(2028);
   const [expiryMonth, setExpiryMonth] = useState(12);

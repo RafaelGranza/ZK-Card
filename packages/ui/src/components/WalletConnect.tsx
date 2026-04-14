@@ -10,6 +10,7 @@ interface WalletConnectProps {
   onAttachContract: (addr: string) => void;
   onDeployContract: () => void;
   isLoading: boolean;
+  showDeploy?: boolean;
 }
 
 const statusColors: Record<ConnectionStatus, string> = {
@@ -34,6 +35,7 @@ export function WalletConnect({
   onAttachContract,
   onDeployContract,
   isLoading,
+  showDeploy = true,
 }: WalletConnectProps) {
   return (
     <div className="bg-gray-900 border border-gray-700 rounded-2xl p-5 space-y-4">
@@ -82,13 +84,15 @@ export function WalletConnect({
               </div>
             ) : (
               <div className="flex gap-2">
-                <button
-                  onClick={onDeployContract}
-                  disabled={isLoading}
-                  className="flex-1 bg-green-700 hover:bg-green-600 disabled:opacity-50 text-white text-sm font-semibold py-2 rounded-xl transition-colors"
-                >
-                  Deploy new
-                </button>
+                {showDeploy && (
+                  <button
+                    onClick={onDeployContract}
+                    disabled={isLoading}
+                    className="flex-1 bg-green-700 hover:bg-green-600 disabled:opacity-50 text-white text-sm font-semibold py-2 rounded-xl transition-colors"
+                  >
+                    Deploy new
+                  </button>
+                )}
                 <button
                   onClick={() => {
                     const addr = prompt("Enter existing contract address:");
