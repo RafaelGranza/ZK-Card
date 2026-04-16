@@ -4,42 +4,6 @@ A prototype that demonstrates private credit card ownership using Aztec's ZK inf
 
 A bank issues a card as an encrypted private note on Aztec. The cardholder can later prove they own a card from that bank — without revealing the card number, expiry date, or credit limit. Only the bank's identity is disclosed.
 
-## What this is (and isn't)
-
-**Is this running on a real network?**
-
-It runs entirely on a local Aztec sandbox (`aztec start --local-network`). The sandbox includes a real sequencer, a real local L1 (anvil), and a real PXE — the cryptography (Honk proofs) is genuine. It's not a devnet (public shared testnet) and it's not mocked. The difference from devnet is that everything runs on your machine.
-
-**What exactly is being proved?**
-
-When you call `prove_card_ownership`, the Noir circuit proves in zero-knowledge:
-
-> *"I know a CardNote whose commitment exists in the note-hash tree, whose `bank_id` matches the required bank, and that belongs to my address."*
-
-The only public output is `bank_id`. Card number, expiry, and credit limit stay private inside the circuit's witness — they never leave the PXE.
-
-**Is the proof on-chain?**
-
-Currently `prove_card_ownership` uses `.simulate()`, which runs the circuit locally in the PXE but does not submit the proof to the sequencer. This means the proof is only verified locally — it's not verifiable by anyone else on-chain. To make it truly on-chain verifiable, swap `.simulate()` for `.send()` in `/api/prove/route.ts`.
-
-`issue_card` does use `.send()`, so the note commitment and encrypted note log are genuinely on-chain (in the note-hash tree and on L1).
-
-**Why one contract? Can multiple banks and users share it?**
-
-Yes — the contract is the entire platform, like a payment network:
-
-```
-ZKCard contract
-  ├── authorized_banks (public state — visible to everyone)
-  │     ├── bank_A → true
-  │     └── bank_B → true
-  └── cards (private state — scoped per holder)
-        ├── user_1 → [CardNote(bank_A), CardNote(bank_B)]
-        └── user_2 → [CardNote(bank_A)]
-```
-
-One contract handles multiple banks, multiple cardholders, and multiple cards per holder. The `authorize_bank` function creates a public registry, but `issue_card` itself does not enforce it on-chain — anyone can issue a note claiming to be a bank. The intended model is that merchants/verifiers call `is_bank_authorized(bank_id)` after the proof to validate the issuing bank.
-
 ## How it works
 
 1. **Deploy** — admin deploys the contract and authorizes banks (public, visible on-chain)
@@ -47,16 +11,49 @@ One contract handles multiple banks, multiple cardholders, and multiple cards pe
 3. **Prove** — holder calls `prove_card_ownership(bank_id)`, generating a ZK proof that they hold a valid card from that bank — returning only `bank_id`
 4. **View** — holder can list their own cards locally via `get_cards` (no on-chain data exposed)
 
-## Accounts
+## Flows
 
-Two sandbox accounts are used:
+### Card Issuance
 
-| Role | Sandbox account | Usage |
-|------|----------------|-------|
-| Bank | `INITIAL_TEST_SECRET_KEYS[0]` | Deploys contract, issues cards |
-| User | `INITIAL_TEST_SECRET_KEYS[1]` | Receives cards, proves ownership |
+```mermaid
+sequenceDiagram
+    actor Bank
+    participant Contract as ZKCard Contract
+    participant Chain as Aztec Chain
+    participant PXE as Holder's PXE
 
-Both accounts are registered in the same PXE so note discovery works for either address.
+    Bank->>Contract: issue_card(holder, card_data)
+    Contract->>Chain: push note_hash + emit encrypted log
+    Chain-->>PXE: PXE discovers encrypted log
+    PXE->>PXE: decrypt and store locally
+```
+
+### Ownership Proof
+
+```mermaid
+sequenceDiagram
+    actor Holder
+    participant PXE as Holder's PXE
+    participant Chain as Aztec Chain
+
+    Holder->>PXE: prove_card_ownership(bank_id)
+    PXE->>PXE: fetch CardNote + generate ZK proof
+    PXE->>Chain: submit proof tx
+    Note over Chain: only bank_id is public output
+```
+
+### Card Lookup
+
+```mermaid
+sequenceDiagram
+    actor Holder
+    participant PXE as Holder's PXE
+
+    Holder->>PXE: get_cards(owner)
+    PXE->>PXE: read local CardNotes
+    PXE->>Holder: return card list
+    Note over Holder,PXE: no on-chain transaction
+```
 
 ## Stack
 
