@@ -4,6 +4,8 @@ A prototype that demonstrates private credit card ownership using Aztec's ZK inf
 
 A bank issues a card as an encrypted private note on Aztec. The cardholder can later prove they own a card from that bank — without revealing the card number, expiry date, or credit limit. Only the bank's identity is disclosed.
 
+![Demo](./docs/images/ZK-Card%20demo.gifdemo.gif)
+
 ## How it works
 
 1. **Deploy** — admin deploys the contract and authorizes banks (public, visible on-chain)
@@ -101,15 +103,10 @@ Output goes to `packages/contracts/target/`.
 
 ## Usage
 
-Two separate portals share the same backend and contract:
+1. **Deploy the contract** — a status badge sits in the bottom-right corner of every page. When the sandbox is running it shows **Deploy contract** (red). Click it once to deploy.
 
-**Bank portal** (`/bank`):
-1. Click **Connect** — registers both accounts in the local PXE
-2. Click **Deploy new** — deploys the ZKCard contract
-3. Fill in **Issue Card** and submit — generates a ZK proof and sends the encrypted note to the user's address
+2. **Issue a card** (`/bank`) — click **Connect**, then fill in the **Issue Card** form. The bank's address is used as the card issuer; the card is stored as an encrypted private note in the user's PXE.
 
-**Cardholder portal** (`/user`):
-1. Click **Connect** — connects to the same PXE
-2. Click **Attach existing** — enter the contract address from the bank portal
-3. Click **Refresh** — lists your private card notes
-4. Click **Generate ZK Proof** — proves ownership of a card without revealing card details
+3. **View cards and generate proofs** (`/user`) — click **Connect**. Your cards appear automatically. Use **Generate ZK Proof** to prove ownership of a card from a specific bank without revealing any card details.
+
+4. **Buy something** (`/store`) — open the store, click **Claim free copy with ZK Card**, select a card, and submit. The purchase is gated on a ZK ownership proof.
