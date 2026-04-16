@@ -67,4 +67,4 @@ pnpm dev                      # open http://localhost:3000
 1. **Deploy** — click the badge in the bottom-right corner to deploy the contract.
 2. **Issue a card** (`/bank`) — connect and fill in the Issue Card form.
 3. **View & prove** (`/user`) — connect; cards load automatically. Use Generate ZK Proof to prove card ownership without revealing any card details.
-4. **Buy** (`/store`) — claim the book with a ZK ownership proof.
+4. **Buy** (`/store`) — claim access to the whitepaper with a ZK ownership proof.

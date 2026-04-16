@@ -22,39 +22,7 @@ function bankGradient(bankId: string): string {
   return gradients[parseInt(bankId.slice(-4), 16) % gradients.length];
 }
 
-function downloadReceipt(provenBankId: string) {
-  const content = `THE ART OF COMPUTER PROGRAMMING
-Donald E. Knuth — Volumes 1-4B
-${"=".repeat(48)}
-
-ZK PURCHASE RECEIPT
-${"-".repeat(48)}
-Timestamp  : ${new Date().toISOString()}
-Status     : VERIFIED
-Bank ID    : ${provenBankId}
-${"-".repeat(48)}
-
-Proved card ownership via ZK circuit on Aztec.
-The following fields were NEVER disclosed:
-
-  Card number  .............. PRIVATE
-  Expiry date  .............. PRIVATE
-  Credit limit .............. PRIVATE
-
-Only bank_id was returned as a public output.
-
-${"=".repeat(48)}
-[ PROTOTYPE — PDF download would be unlocked here ]
-${"=".repeat(48)}
-`;
-  const blob = new Blob([content], { type: "text/plain" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "taocp-receipt.txt";
-  a.click();
-  URL.revokeObjectURL(url);
-}
+const WHITEPAPER_URL = "https://ethereum.org/whitepaper/";
 
 export function BuyModal({ onClose }: BuyModalProps) {
   const aztec = useAztec("user");
@@ -200,11 +168,11 @@ export function BuyModal({ onClose }: BuyModalProps) {
               </div>
 
               <button
-                onClick={() => downloadReceipt(provenBankId)}
-                className="w-full bg-violet-600 hover:bg-violet-500 text-white font-semibold py-3 rounded-xl transition-colors flex items-center justify-center gap-2"
+                onClick={() => window.open(WHITEPAPER_URL, "_blank")}
+                className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-3 rounded-xl transition-colors flex items-center justify-center gap-2"
               >
-                <span>⬇</span>
-                Download receipt
+                <span>🔓</span>
+                Open Ethereum Whitepaper
               </button>
             </div>
           )}

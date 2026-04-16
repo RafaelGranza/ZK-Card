@@ -24,18 +24,21 @@ export default function StorePage() {
 
       {/* Product card */}
       <div className="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden flex flex-col sm:flex-row gap-0">
-        {/* Book cover */}
-        <div className="sm:w-56 flex-shrink-0 bg-gradient-to-br from-amber-900 to-yellow-950 flex flex-col items-center justify-center p-8 gap-3 min-h-64">
-          <div className="w-28 h-36 bg-amber-800 border-l-4 border-amber-600 rounded-sm shadow-2xl flex flex-col items-center justify-center p-2 text-center">
-            <p className="text-amber-200 text-[9px] font-bold uppercase tracking-wide leading-tight">
-              The Art of Computer Programming
+        {/* Cover */}
+        <div className="sm:w-56 flex-shrink-0 bg-gradient-to-br from-indigo-950 to-violet-950 flex flex-col items-center justify-center p-8 gap-3 min-h-64">
+          <div className="w-28 h-36 bg-indigo-900 border-l-4 border-indigo-400 rounded-sm shadow-2xl flex flex-col items-center justify-center p-3 text-center gap-1">
+            <span className="text-indigo-300 text-2xl">♦</span>
+            <p className="text-indigo-200 text-[8px] font-bold uppercase tracking-wide leading-tight">
+              Ethereum
             </p>
-            <div className="my-2 w-8 border-t border-amber-600" />
-            <p className="text-amber-400 text-[8px]">Vol. 1–4B</p>
-            <p className="text-amber-500 text-[7px] mt-1">Knuth</p>
+            <p className="text-indigo-300 text-[7px] leading-tight">
+              A Next-Generation Smart Contract Platform
+            </p>
+            <div className="my-1 w-8 border-t border-indigo-600" />
+            <p className="text-indigo-500 text-[7px]">Buterin</p>
           </div>
-          <span className="text-xs text-amber-700/80 font-mono">
-            TAOCP
+          <span className="text-xs text-indigo-800/80 font-mono">
+            whitepaper
           </span>
         </div>
 
@@ -45,49 +48,48 @@ export default function StorePage() {
             <div className="flex items-start justify-between gap-4">
               <div>
                 <h1 className="text-white text-xl font-bold leading-tight">
-                  The Art of Computer Programming
+                  Ethereum Whitepaper
                 </h1>
                 <p className="text-gray-500 text-sm mt-1">
-                  Donald E. Knuth — Volumes 1–4B
+                  Vitalik Buterin — 2013
                 </p>
               </div>
-              <div className="text-right flex-shrink-0">
-                <p className="text-gray-600 line-through text-sm">$312</p>
-                <p className="text-green-400 font-bold text-lg">Free</p>
+              <div className="text-right flex-shrink-0 space-y-1">
+                <span className="block text-xs font-semibold text-red-400 bg-red-900/30 border border-red-800/50 px-2 py-0.5 rounded-full">
+                  Restricted
+                </span>
               </div>
             </div>
 
             <p className="text-gray-400 text-sm leading-relaxed">
-              The definitive reference on algorithms and data structures.
-              Covers fundamental algorithms, seminumerical algorithms, sorting
-              and searching, and combinatorial algorithms.
+              The original paper proposing a Turing-complete blockchain for
+              smart contracts. Access is restricted to verified ZK Card holders.
             </p>
 
             <div className="flex flex-wrap gap-2">
-              {["Algorithms", "Data Structures", "CS Theory", "4 volumes"].map(
-                (tag) => (
-                  <span
-                    key={tag}
-                    className="text-xs text-indigo-400 bg-indigo-900/30 border border-indigo-800/50 px-2 py-0.5 rounded-full"
-                  >
-                    {tag}
-                  </span>
-                )
-              )}
+              {["Smart Contracts", "EVM", "DApps", "2013"].map((tag) => (
+                <span
+                  key={tag}
+                  className="text-xs text-indigo-400 bg-indigo-900/30 border border-indigo-800/50 px-2 py-0.5 rounded-full"
+                >
+                  {tag}
+                </span>
+              ))}
             </div>
           </div>
 
           <div className="space-y-3">
+            <div className="bg-gray-800/60 border border-gray-700 rounded-xl px-4 py-3 space-y-0.5">
+              <p className="text-xs text-gray-400 font-semibold">For ZK Card holders only</p>
+              <p className="text-xs text-gray-600">Prove ZK Card ownership, reveal nothing</p>
+            </div>
             <button
               onClick={() => setShowModal(true)}
               className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-3 rounded-xl transition-colors flex items-center justify-center gap-2"
             >
               <span className="text-sm">🔐</span>
-              Claim free copy with ZK Card
+              Prove ownership to access
             </button>
-            <p className="text-center text-xs text-gray-600">
-              Prove card ownership without revealing your card details
-            </p>
           </div>
         </div>
       </div>
@@ -110,8 +112,8 @@ export default function StorePage() {
               desc: "ZK proof runs locally in your PXE",
             },
             {
-              icon: "⬇",
-              label: "Download",
+              icon: "🔓",
+              label: "Access",
               desc: "Only bank ID is revealed to the store",
             },
           ].map((step) => (
