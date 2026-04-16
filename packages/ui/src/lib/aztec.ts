@@ -15,7 +15,7 @@ import { Fr } from "@aztec/aztec.js/fields";
 import { EmbeddedWallet } from "@aztec/wallets/embedded";
 import type { AztecAddress } from "@aztec/aztec.js/addresses";
 import type { Wallet } from "@aztec/aztec.js/wallet";
-export const SANDBOX_URL = process.env.PXE_URL ?? "http://localhost:8081";
+export const SANDBOX_URL = process.env.PXE_URL ?? "http://localhost:8080";
 
 // INITIAL_TEST_SECRET_KEYS from @aztec/accounts — matches the sandbox pre-deployed accounts.
 const BANK_SECRET = Fr.fromString("0x2153536ff6628eee01cf4024889ff977a18d9fa61d0e414422f7681cf085c281");

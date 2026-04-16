@@ -52,7 +52,7 @@ export function WalletConnect({ status, address, onConnect, isLoading }: WalletC
 
       {status !== "connected" && (
         <p className="text-[10px] text-gray-600">
-          Requires a local Aztec node at localhost:8081.{" "}
+          Requires a local Aztec node at localhost:8080.{" "}
           <code className="text-gray-500">aztec start --local-network</code>
         </p>
       )}

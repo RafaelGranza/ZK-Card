@@ -57,7 +57,7 @@ sequenceDiagram
 ## Running locally
 
 ```bash
-aztec start --local-network   # start sandbox at localhost:8081
+aztec start --local-network   # start sandbox at localhost:8080
 pnpm install
 pnpm dev                      # open http://localhost:3000
 ```
