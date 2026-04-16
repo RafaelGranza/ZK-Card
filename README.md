@@ -50,8 +50,8 @@ sequenceDiagram
 
 ## Stack
 
-- **Contract**: Noir + aztec-nr `v4.2.0-aztecnr-rc.2`
-- **UI**: Next.js 16 + Tailwind CSS
+- **Contract**: Noir + aztec-nr `v4.2.0-aztecnr-rc.2` — core of the prototype
+- **UI**: Next.js 16 + Tailwind CSS — demo interface only
 - **Network**: Aztec sandbox (local)
 
 ## Running locally
