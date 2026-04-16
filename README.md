@@ -1,21 +1,12 @@
 # ZK Card
 
-A prototype that demonstrates private credit card ownership using Aztec's ZK infrastructure.
+A prototype for private credit card ownership on Aztec. A bank issues a card as an encrypted note; the holder can later prove they own a card from that bank, without revealing the card number, expiry, or limit.
 
-A bank issues a card as an encrypted private note on Aztec. The cardholder can later prove they own a card from that bank — without revealing the card number, expiry date, or credit limit. Only the bank's identity is disclosed.
+![Demo](./docs/images/ZK-Card%20demo.gif)
 
-![Demo](./docs/images/ZK-Card%20demo.gifdemo.gif)
+## Architecture
 
-## How it works
-
-1. **Deploy** — admin deploys the contract and authorizes banks (public, visible on-chain)
-2. **Issue** — bank calls `issue_card`, which stores a `CardNote` (card number hash, expiry, credit limit) as an encrypted note in the holder's PXE
-3. **Prove** — holder calls `prove_card_ownership(bank_id)`, generating a ZK proof that they hold a valid card from that bank — returning only `bank_id`
-4. **View** — holder can list their own cards locally via `get_cards` (no on-chain data exposed)
-
-## Flows
-
-### Card Issuance
+**Issue** — bank calls `issue_card`; the card data is stored as an encrypted note in the holder's PXE, never exposed on-chain.
 
 ```mermaid
 sequenceDiagram
@@ -30,7 +21,7 @@ sequenceDiagram
     PXE->>PXE: decrypt and store locally
 ```
 
-### Ownership Proof
+**Prove** — holder calls `prove_card_ownership(bank_id)`; generates a ZK proof of note membership. Only the bank's identity is a public output.
 
 ```mermaid
 sequenceDiagram
@@ -44,7 +35,7 @@ sequenceDiagram
     Note over Chain: only bank_id is public output
 ```
 
-### Card Lookup
+**View** — holder calls `get_cards`; reads directly from the local PXE, no transaction needed.
 
 ```mermaid
 sequenceDiagram
@@ -63,50 +54,17 @@ sequenceDiagram
 - **UI**: Next.js 16 + Tailwind CSS
 - **Network**: Aztec sandbox (local)
 
-## Requirements
-
-- [Node.js](https://nodejs.org/) v20+
-- [pnpm](https://pnpm.io/) v10+
-- [Aztec CLI](https://docs.aztec.network/getting_started)
-
 ## Running locally
 
-**1. Start the Aztec sandbox**
-
 ```bash
-aztec start --local-network
-```
-
-Runs at `localhost:8081`.
-
-**2. Install dependencies**
-
-```bash
+aztec start --local-network   # start sandbox at localhost:8081
 pnpm install
+pnpm dev                      # open http://localhost:3000
 ```
-
-**3. Start the UI**
-
-```bash
-pnpm dev
-```
-
-Open [http://localhost:3000](http://localhost:3000).
-
-**4. (Optional) Recompile the contract**
-
-```bash
-pnpm compile
-```
-
-Output goes to `packages/contracts/target/`.
 
 ## Usage
 
-1. **Deploy the contract** — a status badge sits in the bottom-right corner of every page. When the sandbox is running it shows **Deploy contract** (red). Click it once to deploy.
-
-2. **Issue a card** (`/bank`) — click **Connect**, then fill in the **Issue Card** form. The bank's address is used as the card issuer; the card is stored as an encrypted private note in the user's PXE.
-
-3. **View cards and generate proofs** (`/user`) — click **Connect**. Your cards appear automatically. Use **Generate ZK Proof** to prove ownership of a card from a specific bank without revealing any card details.
-
-4. **Buy something** (`/store`) — open the store, click **Claim free copy with ZK Card**, select a card, and submit. The purchase is gated on a ZK ownership proof.
+1. **Deploy** — click the badge in the bottom-right corner to deploy the contract.
+2. **Issue a card** (`/bank`) — connect and fill in the Issue Card form.
+3. **View & prove** (`/user`) — connect; cards load automatically. Use Generate ZK Proof to prove card ownership without revealing any card details.
+4. **Buy** (`/store`) — claim the book with a ZK ownership proof.
