@@ -19,7 +19,7 @@ export default function Home() {
         </p>
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-4 w-full max-w-sm">
+      <div className="flex flex-col sm:flex-row gap-4 w-full max-w-sm flex-wrap">
         <Link
           href="/bank"
           className="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white rounded-2xl p-6 text-center transition-colors group"
@@ -36,6 +36,15 @@ export default function Home() {
           <div className="text-3xl mb-2">💳</div>
           <p className="font-semibold text-base">Cardholder</p>
           <p className="text-xs text-gray-400 mt-1">View cards, prove ownership</p>
+        </Link>
+
+        <Link
+          href="/store"
+          className="flex-1 bg-gray-800 hover:bg-gray-700 border border-gray-600 text-white rounded-2xl p-6 text-center transition-colors group"
+        >
+          <div className="text-3xl mb-2">📚</div>
+          <p className="font-semibold text-base">ZK Store</p>
+          <p className="text-xs text-gray-400 mt-1">Buy with private proof</p>
         </Link>
       </div>
     </main>

@@ -9,8 +9,6 @@ import { ProveOwnership } from "@/components/ProveOwnership";
 export default function UserPage() {
   const aztec = useAztec("user");
 
-  const hasContract = Boolean(aztec.contractAddress);
-
   return (
     <main className="min-h-screen p-6 md:p-10">
       <header className="max-w-2xl mx-auto mb-10">
@@ -34,12 +32,8 @@ export default function UserPage() {
         <WalletConnect
           status={aztec.status}
           address={aztec.address}
-          contractAddress={aztec.contractAddress ?? ""}
           onConnect={aztec.connect}
-          onAttachContract={aztec.attachContract}
-          onDeployContract={aztec.deployContract}
           isLoading={aztec.isLoading}
-          showDeploy={false}
         />
 
         {aztec.error && (
@@ -49,7 +43,7 @@ export default function UserPage() {
           </div>
         )}
 
-        {aztec.status === "connected" && hasContract && (
+        {aztec.status === "connected" && (
           <>
             {/* Card gallery */}
             <div className="bg-gray-900 border border-gray-700 rounded-2xl p-5 space-y-4">

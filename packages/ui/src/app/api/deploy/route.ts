@@ -11,7 +11,7 @@ export async function POST(request: Request) {
     let address: string;
 
     if (body.existingAddress) {
-      attachZKCard(body.existingAddress, wallet);
+      await attachZKCard(body.existingAddress, wallet);
       address = body.existingAddress;
     } else {
       const existing = getContractAddress();

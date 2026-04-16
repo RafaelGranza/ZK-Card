@@ -1,8 +1,8 @@
 /**
  * contract.ts — Server-side ZKCard contract interface (Node.js only).
  *
- * deployZKCard() and attachZKCard() take a Wallet (the sandbox node cast as
- * Wallet) which has both PXE and signing capabilities in sandbox mode.
+ * State is stored on `global` so Next.js hot reloads don't clear it.
+ * Sandbox restarts wipe contract state — just redeploy from Bank Portal.
  */
 
 import { Contract } from "@aztec/aztec.js/contracts";
@@ -13,38 +13,49 @@ import type { Wallet } from "@aztec/aztec.js/wallet";
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const ZKCardArtifact = loadContractArtifact(require("../../../contracts/target/zk_card-ZKCard.json"));
 
-let contractInstance: Contract | null = null;
-let contractAddressStr: string | null = null;
+// Persist across hot reloads using global (standard Next.js dev pattern).
+const g = global as typeof global & {
+  _zkContract: Contract | undefined;
+};
 
-/** Deploys a new ZKCard contract. Returns the deployed contract. */
+function getStored(): Contract | null  { return g._zkContract ?? null; }
+function setStored(c: Contract | null) { g._zkContract = c ?? undefined; }
+
+/** Deploys a new ZKCard contract. */
 export async function deployZKCard(wallet: Wallet, admin: AztecAddress): Promise<Contract> {
-  // Contract.deploy(wallet, artifact, [constructorArgs]) builds a DeployMethod.
-  // .send({ from: admin }) submits the deployment tx and waits for mining.
   const { contract } = await Contract.deploy(wallet, ZKCardArtifact, [admin]).send({ from: admin });
-  contractInstance = contract;
-  contractAddressStr = contract.address.toString();
+  setStored(contract);
   return contract;
 }
 
-/** Attaches to an already-deployed ZKCard contract. */
-export function attachZKCard(address: string, wallet: Wallet): Contract {
+/**
+ * Attaches to an already-deployed ZKCard contract.
+ * Registers the artifact with the PXE so private function simulations work.
+ */
+export async function attachZKCard(address: string, wallet: Wallet): Promise<Contract> {
   const addr = AztecAddress.fromString(address);
+  const { instance } = await wallet.getContractMetadata(addr);
+  if (!instance) throw new Error(`No contract found at ${address}. Did the sandbox restart?`);
+  await wallet.registerContract(instance, ZKCardArtifact);
   const c = Contract.at(addr, ZKCardArtifact, wallet);
-  contractInstance = c;
-  contractAddressStr = address;
+  setStored(c);
   return c;
 }
 
-/** Returns the current contract (throws if not set). */
+/** Returns the current contract or throws a clear error. */
 export function getContract(): Contract {
-  if (!contractInstance) {
-    throw new Error("Contract not deployed. Call /api/deploy first.");
-  }
-  return contractInstance;
+  const c = getStored();
+  if (!c) throw new Error("Contract not set. Click on the bottom right buttom to deploy it.");
+  return c;
 }
 
 export function getContractAddress(): string | null {
-  return contractAddressStr;
+  return getStored()?.address.toString() ?? null;
+}
+
+/** Called by aztec.ts when a sandbox restart is detected. */
+export function clearContractCache(): void {
+  setStored(null);
 }
 
 // ─── Shared type ─────────────────────────────────────────────────────────────
@@ -54,5 +65,7 @@ export interface CardNoteData {
   bankId: string;
   expiryYear: number;
   expiryMonth: number;
-  creditLimit: number; // in dollars
+  creditLimit: number;
+  /** Display label set by the bank at issuance — stored client-side in localStorage. */
+  label?: string;
 }

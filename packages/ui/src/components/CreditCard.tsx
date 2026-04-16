@@ -39,6 +39,7 @@ function formatMonth(m: number): string {
 }
 
 export function CreditCard({ card, isVerified = false }: CreditCardProps) {
+  const label = card.label ?? "ZK Card";
   const gradient = bankGradient(card.bankId);
   const masked = maskedNumber(card.cardNumberHash);
   const expiry = `${formatMonth(card.expiryMonth)}/${String(card.expiryYear).slice(-2)}`;
@@ -75,6 +76,11 @@ export function CreditCard({ card, isVerified = false }: CreditCardProps) {
         <span className="text-xs bg-white/10 border border-white/20 px-2 py-0.5 rounded-full">
           ZK
         </span>
+      </div>
+
+      {/* Card label */}
+      <div className="absolute top-8 left-20 text-sm font-semibold tracking-wide opacity-90">
+        {label}
       </div>
 
       {/* Card number */}

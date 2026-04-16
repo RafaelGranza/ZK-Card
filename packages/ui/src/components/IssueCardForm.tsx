@@ -48,6 +48,7 @@ export function IssueCardForm({
   defaultHolderAddress = "",
 }: IssueCardFormProps) {
   const [holderAddr, setHolderAddr] = useState(defaultHolderAddress);
+  const [label, setLabel] = useState("My ZK Card");
   const [cardNumber, setCardNumber] = useState("4532 0151 1283 0366");
   const [expiryYear, setExpiryYear] = useState(2028);
   const [expiryMonth, setExpiryMonth] = useState(12);
@@ -72,6 +73,10 @@ export function IssueCardForm({
         expiryMonth,
         creditLimit: BigInt(creditLimit).toString(),
       });
+      // Save label to localStorage so the cardholder UI can display it.
+      const hash = "0x" + cardNumberHashBig.toString(16).padStart(64, "0");
+      const existing = JSON.parse(localStorage.getItem("zk-card-labels") ?? "{}");
+      localStorage.setItem("zk-card-labels", JSON.stringify({ ...existing, [hash]: label }));
       setStatus("done");
       setTxNote("Card issued! The holder's PXE will discover the note.");
     } catch (err) {
@@ -97,6 +102,19 @@ export function IssueCardForm({
       )}
 
       <div className="space-y-3">
+        <div>
+          <label className="block text-xs text-gray-400 mb-1">
+            Card Label
+          </label>
+          <input
+            type="text"
+            value={label}
+            onChange={(e) => setLabel(e.target.value)}
+            placeholder="e.g. My Nubank, Work Visa"
+            className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-indigo-500"
+          />
+        </div>
+
         <div>
           <label className="block text-xs text-gray-400 mb-1">
             Holder Address

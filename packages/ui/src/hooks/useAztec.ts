@@ -12,7 +12,7 @@
  *   API routes. The hook just manages UI state and makes fetch() calls.
  */
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import type { CardNoteData } from "@/lib/contract";
 
 export type ConnectionStatus =
@@ -88,6 +88,15 @@ export function useAztec(role: AztecRole = "bank"): AztecState {
   const connect = useCallback(async () => {
     setStatus("connecting");
     try {
+      // Block connection if the contract isn't deployed yet.
+      const { status: contractStatus } = await api<{ status: string }>("/api/status");
+      if (contractStatus === "offline") {
+        throw new Error("Aztec sandbox is offline. Start it with: aztec start --local-network");
+      }
+      if (contractStatus !== "ready") {
+        throw new Error("Contract not deployed. Use the badge in the bottom-right corner to deploy it first.");
+      }
+
       const { bankAddress, userAddress } = await withLoading(() =>
         api<{ bankAddress: string; userAddress: string }>("/api/connect", {
           method: "POST",
@@ -101,7 +110,9 @@ export function useAztec(role: AztecRole = "bank"): AztecState {
         setPeerAddress(bankAddress);
       }
       setStatus("connected");
-    } catch {
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      setError(msg);
       setStatus("error");
     }
   }, [role, withLoading]);
@@ -159,8 +170,18 @@ export function useAztec(role: AztecRole = "bank"): AztecState {
     const { cards: c } = await withLoading(() =>
       api<{ cards: CardNoteData[] }>(`/api/cards?owner=${address}`)
     );
-    setCards(c);
+    const labels: Record<string, string> = JSON.parse(
+      localStorage.getItem("zk-card-labels") ?? "{}"
+    );
+    setCards(c.map((card) => ({ ...card, label: labels[card.cardNumberHash] })));
   }, [address, withLoading]);
+
+  // Auto-load cards when the user role connects (address goes null → value).
+  useEffect(() => {
+    if (role === "user" && address) {
+      refreshCards();
+    }
+  }, [role, address, refreshCards]);
 
   return {
     status,

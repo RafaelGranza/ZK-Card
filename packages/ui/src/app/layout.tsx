@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { ContractStatusBadge } from "@/components/ContractStatusBadge";
 
 // Force all routes to render dynamically (no SSG) so the build doesn't try to
 // statically pre-render pages — which would require connecting to the sandbox.
@@ -17,7 +18,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        {children}
+        <ContractStatusBadge />
+      </body>
     </html>
   );
 }

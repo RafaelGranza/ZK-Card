@@ -1,6 +1,5 @@
 "use client";
 
-import { useCallback } from "react";
 import Link from "next/link";
 import { useAztec } from "@/hooks/useAztec";
 import { WalletConnect } from "@/components/WalletConnect";
@@ -8,10 +7,6 @@ import { IssueCardForm } from "@/components/IssueCardForm";
 
 export default function BankPage() {
   const aztec = useAztec("bank");
-
-  const handleDeploy = useCallback(async () => {
-    await aztec.deployContract();
-  }, [aztec]);
 
   return (
     <main className="min-h-screen p-6 md:p-10">
@@ -36,12 +31,8 @@ export default function BankPage() {
         <WalletConnect
           status={aztec.status}
           address={aztec.address}
-          contractAddress={aztec.contractAddress ?? ""}
           onConnect={aztec.connect}
-          onAttachContract={aztec.attachContract}
-          onDeployContract={handleDeploy}
           isLoading={aztec.isLoading}
-          showDeploy={true}
         />
 
         {aztec.error && (
@@ -51,7 +42,7 @@ export default function BankPage() {
           </div>
         )}
 
-        {aztec.status === "connected" && aztec.contractAddress && (
+        {aztec.status === "connected" && (
           <IssueCardForm
             onIssue={aztec.issueCard}
             isLoading={aztec.isLoading}
