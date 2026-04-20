@@ -32,18 +32,23 @@ export async function GET(request: Request) {
     const contract = getContract();
     const owner = AztecAddress.fromString(ownerStr);
 
-    // Pass `from: owner` so the PXE knows which address to decrypt notes for.
-    // Without `from`, scopes defaults to [undefined] which throws in the PXE.
-    // get_cards returns ([CardNote; MAX_NOTES_PER_PAGE], bool)
-    const simResult = await contract.methods
-      .get_cards(owner, 0)
-      .simulate({ from: owner });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const [rawCards] = simResult.result as [RawCard[], boolean];
+    // Fetch all pages. get_cards returns ([CardNote; MAX_NOTES_PER_PAGE], bool)
+    // where the bool signals that another page may exist.
+    const allRaw: RawCard[] = [];
+    let page = 0;
+    let hasMore = true;
+    while (hasMore) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const simResult = await contract.methods
+        .get_cards(owner, page)
+        .simulate({ from: owner });
+      const [rawCards, more] = simResult.result as [RawCard[], boolean];
+      allRaw.push(...rawCards.filter((c) => BigInt(c.bank_id) !== BigInt(0)));
+      hasMore = more;
+      page++;
+    }
 
-    const cards: CardNoteData[] = rawCards
-      .filter((c) => BigInt(c.bank_id) !== BigInt(0))
-      .map(parseCard);
+    const cards: CardNoteData[] = allRaw.map(parseCard);
 
     return NextResponse.json({ cards });
   } catch (error) {
@@ -69,6 +74,25 @@ export async function POST(request: Request) {
       expiryMonth: number;
       creditLimit: string;
     };
+
+    if (!holderAddress) {
+      return NextResponse.json({ error: "missing holderAddress" }, { status: 400 });
+    }
+    if (!cardNumberHash) {
+      return NextResponse.json({ error: "missing cardNumberHash" }, { status: 400 });
+    }
+    const month = Number(expiryMonth);
+    if (!Number.isInteger(month) || month < 1 || month > 12) {
+      return NextResponse.json({ error: "expiryMonth must be 1–12" }, { status: 400 });
+    }
+    const year = Number(expiryYear);
+    if (!Number.isInteger(year) || year < 2024 || year > 2050) {
+      return NextResponse.json({ error: "expiryYear must be 2024–2050" }, { status: 400 });
+    }
+    const limit = BigInt(creditLimit);
+    if (limit <= 0n) {
+      return NextResponse.json({ error: "creditLimit must be positive" }, { status: 400 });
+    }
 
     const bankAddress = await getSandboxAccountAddress();
     const contract = getContract();

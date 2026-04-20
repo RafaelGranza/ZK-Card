@@ -46,7 +46,7 @@ export interface AztecState {
   deployContract: () => Promise<void>;
   attachContract: (address: string) => Promise<void>;
   issueCard: (params: IssueCardParams) => Promise<void>;
-  proveOwnership: (bankId: string) => Promise<string>;
+  proveOwnership: (bankId: string) => Promise<void>;
   refreshCards: () => Promise<void>;
 }
 
@@ -158,15 +158,14 @@ export function useAztec(role: AztecRole = "bank"): AztecState {
   );
 
   const proveOwnership = useCallback(
-    async (bankId: string): Promise<string> => {
-      const { provenBankId } = await withLoading(() =>
-        api<{ provenBankId: string }>("/api/prove", {
+    async (bankId: string): Promise<void> => {
+      await withLoading(() =>
+        api<{ verified: boolean }>("/api/prove", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ bankId }),
         }),
       );
-      return provenBankId;
     },
     [withLoading],
   );

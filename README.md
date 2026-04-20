@@ -21,18 +21,18 @@ sequenceDiagram
     PXE->>PXE: decrypt and store locally
 ```
 
-**Prove** — holder calls `prove_card_ownership(bank_id)`; generates a ZK proof of note membership. Only the bank's identity is a public output.
+**Prove** — holder calls `prove_card_ownership(bank_id, current_year, current_month)`; the circuit runs locally in the PXE. It checks note membership and that the card has not expired. No transaction is submitted — success is the proof.
 
 ```mermaid
 sequenceDiagram
     actor Holder
     participant PXE as Holder's PXE
-    participant Chain as Aztec Chain
 
-    Holder->>PXE: prove_card_ownership(bank_id)
-    PXE->>PXE: fetch CardNote + generate ZK proof
-    PXE->>Chain: submit proof tx
-    Note over Chain: only bank_id is public output
+    Holder->>PXE: prove_card_ownership(bank_id, year, month)
+    PXE->>PXE: fetch CardNote + run ACIR circuit locally
+    PXE->>PXE: verify: note membership + card not expired
+    Note over PXE: no tx submitted — proof stays local
+    Note over PXE: card number, expiry, limit stay private
 ```
 
 **View** — holder calls `get_cards`; reads directly from the local PXE, no transaction needed.
@@ -53,6 +53,8 @@ sequenceDiagram
 - **Contract**: Noir + aztec-nr `v4.2.0-aztecnr-rc.2` — core of the prototype
 - **UI**: Next.js 16 + Tailwind CSS — demo interface only
 - **Network**: Aztec sandbox (local)
+
+> **Toolchain**: contract uses aztec-nr `v4.2.0-aztecnr-rc.2` (Nargo.toml); UI packages use `@aztec/* 4.2.0-aztecnr-rc.2`. Run `aztec --version` to confirm your local CLI matches before compiling.
 
 ## Running locally
 

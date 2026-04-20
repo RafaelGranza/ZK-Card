@@ -43,6 +43,14 @@ export function BuyModal({ onClose }: BuyModalProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // If connect() fails internally (sets status="error" without throwing), show error
+  useEffect(() => {
+    if (aztec.status === "error") {
+      setErrorMsg(aztec.error ?? "Connection failed");
+      setStep("error");
+    }
+  }, [aztec.status, aztec.error]);
+
   // Once address is set, load cards and advance to select
   useEffect(() => {
     if (!aztec.address) return;
@@ -59,8 +67,8 @@ export function BuyModal({ onClose }: BuyModalProps) {
   async function handleSelectCard(card: CardNoteData) {
     setStep("proving");
     try {
-      const id = await aztec.proveOwnership(card.bankId);
-      setProvenBankId(id);
+      await aztec.proveOwnership(card.bankId);
+      setProvenBankId(card.bankId);
       setStep("success");
     } catch (e) {
       setErrorMsg(e instanceof Error ? e.message : String(e));

@@ -1,18 +1,16 @@
 /**
- * POST /api/prove — Generates a ZK proof of card ownership.
+ * POST /api/prove — Runs the ZK ownership circuit locally in the PXE.
  *
  * Body: { bankId: string }
- * Returns: { provenBankId: string }
+ * Returns: { verified: true }
  *
  * Uses `.simulate({ from: address })` which:
  *   1. Queries the PXE for a CardNote matching bank_id
- *   2. Runs the ACIR circuit locally (generates ZK proof)
- *   3. Verifies the circuit constraints
- *   4. Returns the public output (bank_id) in SimulationResult.result
+ *   2. Runs the ACIR circuit locally — no transaction submitted
+ *   3. Verifies circuit constraints (note membership + card not expired)
  *
- * To submit the proof on-chain (and have it verifiable by anyone), use .send()
- * instead of .simulate(). For this prototype, .simulate() demonstrates the
- * ZK proof generation without spending gas.
+ * Success means the constraints held. The function has no public return value —
+ * the only information revealed is what the caller already supplied (bank_id).
  */
 
 import { NextResponse } from "next/server";
@@ -30,20 +28,16 @@ export async function POST(request: Request) {
     const contract = getContract();
     const accountAddr = await getUserAddress();
 
-    // Simulate the private prove_card_ownership function.
-    // The circuit runs locally in the PXE with the private witness (CardNote).
-    // The return value (bank_id) is the only public output.
-    const simResult = await contract.methods
-      .prove_card_ownership(BigInt(bankId))
+    // Pass the current calendar date so the circuit can check card expiry.
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth() + 1;
+
+    await contract.methods
+      .prove_card_ownership(BigInt(bankId), currentYear, currentMonth)
       .simulate({ from: accountAddr });
 
-    const provenBankId =
-      "0x" +
-      BigInt(simResult.result as bigint | string)
-        .toString(16)
-        .padStart(64, "0");
-
-    return NextResponse.json({ provenBankId });
+    return NextResponse.json({ verified: true });
   } catch (error) {
     const msg = error instanceof Error ? error.message : String(error);
     return NextResponse.json({ error: msg }, { status: 500 });
