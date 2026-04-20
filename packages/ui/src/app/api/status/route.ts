@@ -18,7 +18,9 @@ export async function GET() {
 
   // Verify the contract still exists — catches sandbox restarts that wipe chain state.
   // The embedded PXE synced to the old chain; clear it so next request gets a fresh one.
-  const { instance } = await wallet.getContractMetadata(AztecAddress.fromString(address));
+  const { instance } = await wallet.getContractMetadata(
+    AztecAddress.fromString(address),
+  );
   if (!instance) {
     clearWalletCache();
     clearContractCache();

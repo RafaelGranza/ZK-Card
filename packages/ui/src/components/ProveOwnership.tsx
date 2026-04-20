@@ -110,7 +110,8 @@ export function ProveOwnership({
             {proofResult}
           </p>
           <p className="text-[10px] text-gray-500 mt-1">
-            This is the ONLY information revealed. Your card details remain private.
+            This is the ONLY information revealed. Your card details remain
+            private.
           </p>
         </div>
       )}

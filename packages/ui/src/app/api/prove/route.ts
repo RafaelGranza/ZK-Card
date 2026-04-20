@@ -38,7 +38,10 @@ export async function POST(request: Request) {
       .simulate({ from: accountAddr });
 
     const provenBankId =
-      "0x" + BigInt(simResult.result as bigint | string).toString(16).padStart(64, "0");
+      "0x" +
+      BigInt(simResult.result as bigint | string)
+        .toString(16)
+        .padStart(64, "0");
 
     return NextResponse.json({ provenBankId });
   } catch (error) {
