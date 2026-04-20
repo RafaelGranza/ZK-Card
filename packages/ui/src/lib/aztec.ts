@@ -18,8 +18,12 @@ import type { Wallet } from "@aztec/aztec.js/wallet";
 export const SANDBOX_URL = process.env.PXE_URL ?? "http://localhost:8080";
 
 // INITIAL_TEST_SECRET_KEYS from @aztec/accounts — matches the sandbox pre-deployed accounts.
-const BANK_SECRET = Fr.fromString("0x2153536ff6628eee01cf4024889ff977a18d9fa61d0e414422f7681cf085c281");
-const USER_SECRET = Fr.fromString("0xaebd1b4be76efa44f5ee655c20bf9ea60f7ae44b9a7fd1fd9f189c7a0b0cdae");
+const BANK_SECRET = Fr.fromString(
+  "0x2153536ff6628eee01cf4024889ff977a18d9fa61d0e414422f7681cf085c281",
+);
+const USER_SECRET = Fr.fromString(
+  "0xaebd1b4be76efa44f5ee655c20bf9ea60f7ae44b9a7fd1fd9f189c7a0b0cdae",
+);
 
 // Persist across Next.js hot reloads using global (standard dev pattern).
 const g = global as typeof global & {
@@ -28,12 +32,18 @@ const g = global as typeof global & {
   _zkUserAddress: AztecAddress | undefined;
 };
 
-function getWallet()   { return g._zkWallet       ?? null; }
-function getBank()     { return g._zkBankAddress  ?? null; }
-function getUser()     { return g._zkUserAddress  ?? null; }
+function getWallet() {
+  return g._zkWallet ?? null;
+}
+function getBank() {
+  return g._zkBankAddress ?? null;
+}
+function getUser() {
+  return g._zkUserAddress ?? null;
+}
 
 function setWallet(w: EmbeddedWallet, bank: AztecAddress, user: AztecAddress) {
-  g._zkWallet      = w;
+  g._zkWallet = w;
   g._zkBankAddress = bank;
   g._zkUserAddress = user;
 }
@@ -51,8 +61,10 @@ export async function getSandboxWallet(): Promise<EmbeddedWallet> {
   if (getWallet()) return getWallet()!;
 
   const wallet = await EmbeddedWallet.create(SANDBOX_URL, { ephemeral: true });
-  const bank = (await wallet.createSchnorrAccount(BANK_SECRET, Fr.ZERO)).address;
-  const user = (await wallet.createSchnorrAccount(USER_SECRET, Fr.ZERO)).address;
+  const bank = (await wallet.createSchnorrAccount(BANK_SECRET, Fr.ZERO))
+    .address;
+  const user = (await wallet.createSchnorrAccount(USER_SECRET, Fr.ZERO))
+    .address;
   setWallet(wallet, bank, user);
   return wallet;
 }

@@ -46,7 +46,7 @@ export interface AztecState {
   deployContract: () => Promise<void>;
   attachContract: (address: string) => Promise<void>;
   issueCard: (params: IssueCardParams) => Promise<void>;
-  proveOwnership: (bankId: string) => Promise<string>;
+  proveOwnership: (bankId: string) => Promise<void>;
   refreshCards: () => Promise<void>;
 }
 
@@ -82,25 +82,31 @@ export function useAztec(role: AztecRole = "bank"): AztecState {
         setIsLoading(false);
       }
     },
-    []
+    [],
   );
 
   const connect = useCallback(async () => {
     setStatus("connecting");
     try {
       // Block connection if the contract isn't deployed yet.
-      const { status: contractStatus } = await api<{ status: string }>("/api/status");
+      const { status: contractStatus } = await api<{ status: string }>(
+        "/api/status",
+      );
       if (contractStatus === "offline") {
-        throw new Error("Aztec sandbox is offline. Start it with: aztec start --local-network");
+        throw new Error(
+          "Aztec sandbox is offline. Start it with: aztec start --local-network",
+        );
       }
       if (contractStatus !== "ready") {
-        throw new Error("Contract not deployed. Use the badge in the bottom-right corner to deploy it first.");
+        throw new Error(
+          "Contract not deployed. Use the badge in the bottom-right corner to deploy it first.",
+        );
       }
 
       const { bankAddress, userAddress } = await withLoading(() =>
         api<{ bankAddress: string; userAddress: string }>("/api/connect", {
           method: "POST",
-        })
+        }),
       );
       if (role === "bank") {
         setAddress(bankAddress);
@@ -119,7 +125,7 @@ export function useAztec(role: AztecRole = "bank"): AztecState {
 
   const deployContract = useCallback(async () => {
     const { contractAddress: addr } = await withLoading(() =>
-      api<{ contractAddress: string }>("/api/deploy", { method: "POST" })
+      api<{ contractAddress: string }>("/api/deploy", { method: "POST" }),
     );
     setContractAddress(addr);
   }, [withLoading]);
@@ -131,11 +137,11 @@ export function useAztec(role: AztecRole = "bank"): AztecState {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ existingAddress }),
-        })
+        }),
       );
       setContractAddress(addr);
     },
-    [withLoading]
+    [withLoading],
   );
 
   const issueCard = useCallback(
@@ -145,35 +151,36 @@ export function useAztec(role: AztecRole = "bank"): AztecState {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(params),
-        })
+        }),
       );
     },
-    [withLoading]
+    [withLoading],
   );
 
   const proveOwnership = useCallback(
-    async (bankId: string): Promise<string> => {
-      const { provenBankId } = await withLoading(() =>
-        api<{ provenBankId: string }>("/api/prove", {
+    async (bankId: string): Promise<void> => {
+      await withLoading(() =>
+        api<{ verified: boolean }>("/api/prove", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ bankId }),
-        })
+        }),
       );
-      return provenBankId;
     },
-    [withLoading]
+    [withLoading],
   );
 
   const refreshCards = useCallback(async () => {
     if (!address) return;
     const { cards: c } = await withLoading(() =>
-      api<{ cards: CardNoteData[] }>(`/api/cards?owner=${address}`)
+      api<{ cards: CardNoteData[] }>(`/api/cards?owner=${address}`),
     );
     const labels: Record<string, string> = JSON.parse(
-      localStorage.getItem("zk-card-labels") ?? "{}"
+      localStorage.getItem("zk-card-labels") ?? "{}",
     );
-    setCards(c.map((card) => ({ ...card, label: labels[card.cardNumberHash] })));
+    setCards(
+      c.map((card) => ({ ...card, label: labels[card.cardNumberHash] })),
+    );
   }, [address, withLoading]);
 
   // Auto-load cards when the user role connects (address goes null → value).

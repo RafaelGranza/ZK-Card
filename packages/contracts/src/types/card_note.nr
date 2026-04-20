@@ -8,7 +8,8 @@ use aztec::{macros::notes::note, protocol::traits::{Deserialize, Packable, Seria
 #[derive(Deserialize, Eq, Packable, Serialize)]
 #[note]
 pub struct CardNote {
-    /// Poseidon2 hash of the real card number. Never stored in plaintext.
+    /// SHA-256 hash of the card number reduced mod BN254 Fr (supplied by the JS client).
+    /// Never stored in plaintext.
     pub card_number_hash: Field,
     /// Issuing bank's AztecAddress as a Field.
     pub bank_id: Field,

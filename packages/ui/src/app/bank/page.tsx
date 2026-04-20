@@ -12,7 +12,10 @@ export default function BankPage() {
     <main className="min-h-screen p-6 md:p-10">
       <header className="max-w-2xl mx-auto mb-10">
         <div className="flex items-center gap-3 mb-1">
-          <Link href="/" className="text-gray-500 hover:text-gray-300 text-sm transition-colors">
+          <Link
+            href="/"
+            className="text-gray-500 hover:text-gray-300 text-sm transition-colors"
+          >
             ← Back
           </Link>
         </div>
@@ -38,7 +41,9 @@ export default function BankPage() {
         {aztec.error && (
           <div className="bg-red-900/30 border border-red-700 rounded-xl px-4 py-3">
             <p className="text-xs text-red-300 font-medium">Error</p>
-            <p className="text-xs text-red-400 mt-0.5 break-all">{aztec.error}</p>
+            <p className="text-xs text-red-400 mt-0.5 break-all">
+              {aztec.error}
+            </p>
           </div>
         )}
 

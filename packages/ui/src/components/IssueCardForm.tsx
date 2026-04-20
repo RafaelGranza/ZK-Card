@@ -8,8 +8,8 @@
  * mechanism before adding on-chain bank authorization).
  *
  * What happens on submit:
- *  1. The card number is hashed locally with keccak (placeholder; ideally
- *     Poseidon2 in a WASM module).
+ *  1. The card number is hashed client-side with SHA-256, reduced mod BN254 Fr
+ *     so it fits in a Noir Field. (Poseidon2 would be circuit-native but needs WASM.)
  *  2. `issue_card` is called on the ZKCard contract.
  *  3. The PXE generates a ZK proof and sends the tx to the sandbox.
  *  4. The holder's PXE discovers the encrypted note and stores it locally.
@@ -26,12 +26,14 @@ interface IssueCardFormProps {
 }
 
 // BN254 Fr modulus — Noir's Field type must be < this value.
-// SHA-256 is 256 bits; the modulus is ~254 bits, so ~25% of hashes would overflow
-// without the modulo. We reduce here so the value is always a valid Noir Field.
-const BN254_FR_MODULUS = 21888242871839275222246405745257275088696311157297823662689037894645226208583n;
+// SHA-256 is 256 bits; the modulus is ~254 bits, so ~25% of hashes need reduction.
+// The modulo introduces a small statistical bias (values in [0, 2^256 mod p) are
+// twice as likely), which is acceptable for a demo but not for production commitments.
+const BN254_FR_MODULUS =
+  21888242871839275222246405745257275088696311157297823662689037894645226208583n;
 
-// Naive hash for demo — replaces Poseidon2 which requires WASM.
-// Reduces mod Fr modulus so the value is always a valid Noir Field.
+// SHA-256 the card number and reduce mod BN254 Fr so the result fits in a Noir Field.
+// Poseidon2 (circuit-native, no bias) would be the right choice in production.
 async function hashCardNumber(cardNumber: string): Promise<bigint> {
   const enc = new TextEncoder().encode(cardNumber);
   const buf = await crypto.subtle.digest("SHA-256", enc);
@@ -54,7 +56,7 @@ export function IssueCardForm({
   const [expiryMonth, setExpiryMonth] = useState(12);
   const [creditLimit, setCreditLimit] = useState(500000); // $5000.00 in cents
   const [status, setStatus] = useState<"idle" | "pending" | "done" | "error">(
-    "idle"
+    "idle",
   );
   const [txNote, setTxNote] = useState("");
 
@@ -64,7 +66,7 @@ export function IssueCardForm({
     setTxNote("");
     try {
       const cardNumberHashBig = await hashCardNumber(
-        cardNumber.replace(/\s/g, "")
+        cardNumber.replace(/\s/g, ""),
       );
       await onIssue({
         holderAddress: holderAddr,
@@ -75,8 +77,13 @@ export function IssueCardForm({
       });
       // Save label to localStorage so the cardholder UI can display it.
       const hash = "0x" + cardNumberHashBig.toString(16).padStart(64, "0");
-      const existing = JSON.parse(localStorage.getItem("zk-card-labels") ?? "{}");
-      localStorage.setItem("zk-card-labels", JSON.stringify({ ...existing, [hash]: label }));
+      const existing = JSON.parse(
+        localStorage.getItem("zk-card-labels") ?? "{}",
+      );
+      localStorage.setItem(
+        "zk-card-labels",
+        JSON.stringify({ ...existing, [hash]: label }),
+      );
       setStatus("done");
       setTxNote("Card issued! The holder's PXE will discover the note.");
     } catch (err) {
@@ -103,9 +110,7 @@ export function IssueCardForm({
 
       <div className="space-y-3">
         <div>
-          <label className="block text-xs text-gray-400 mb-1">
-            Card Label
-          </label>
+          <label className="block text-xs text-gray-400 mb-1">Card Label</label>
           <input
             type="text"
             value={label}

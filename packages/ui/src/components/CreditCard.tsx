@@ -16,8 +16,7 @@ function bankGradient(bankId: string): string {
     "from-amber-600 to-orange-900",
     "from-cyan-600 to-sky-900",
   ];
-  const idx =
-    parseInt(bankId.slice(-4), 16) % gradients.length;
+  const idx = parseInt(bankId.slice(-4), 16) % gradients.length;
   return gradients[idx];
 }
 
@@ -25,12 +24,7 @@ function bankGradient(bankId: string): string {
 function maskedNumber(hash: string): string {
   const seg = hash.slice(2, 18); // 16 hex chars
   const digits = seg.replace(/[^0-9a-f]/gi, "0").slice(0, 16);
-  const groups = [
-    digits.slice(0, 4),
-    "****",
-    "****",
-    digits.slice(12, 16),
-  ];
+  const groups = [digits.slice(0, 4), "****", "****", digits.slice(12, 16)];
   return groups.join("  ");
 }
 
@@ -113,9 +107,7 @@ export function CreditCard({ card, isVerified = false }: CreditCardProps) {
 
       {/* Bank ID footer (truncated) */}
       <div className="absolute bottom-0 left-0 right-0 bg-black/20 px-3 py-0.5">
-        <p className="text-[8px] opacity-40 truncate">
-          bank: {card.bankId}
-        </p>
+        <p className="text-[8px] opacity-40 truncate">bank: {card.bankId}</p>
       </div>
     </div>
   );

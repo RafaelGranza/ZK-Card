@@ -80,8 +80,12 @@ export default function StorePage() {
 
           <div className="space-y-3">
             <div className="bg-gray-800/60 border border-gray-700 rounded-xl px-4 py-3 space-y-0.5">
-              <p className="text-xs text-gray-400 font-semibold">For ZK Card holders only</p>
-              <p className="text-xs text-gray-600">Prove ZK Card ownership, reveal nothing</p>
+              <p className="text-xs text-gray-400 font-semibold">
+                For ZK Card holders only
+              </p>
+              <p className="text-xs text-gray-600">
+                Prove ZK Card ownership, reveal nothing
+              </p>
             </div>
             <button
               onClick={() => setShowModal(true)}

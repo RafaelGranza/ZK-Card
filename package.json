@@ -4,9 +4,10 @@
   "private": true,
   "packageManager": "pnpm@10.33.0",
   "scripts": {
+    "format": "pnpm --filter ui format",
     "compile": "pnpm --filter contracts compile",
     "test": "pnpm --filter contracts test",
     "dev": "pnpm --filter ui dev",
-    "build": "pnpm --filter ui build"
+    "build": "pnpm compile && pnpm --filter ui build"
   }
 }

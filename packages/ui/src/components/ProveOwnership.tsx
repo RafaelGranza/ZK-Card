@@ -6,11 +6,9 @@
  * What happens when you click "Prove":
  *  1. The PXE finds one of your CardNotes whose bank_id matches the input.
  *  2. The ACIR circuit (compiled from prove_card_ownership in Noir) runs
- *     locally in your browser/node, generating a ZK proof.
- *  3. The proof and the public output (bank_id) are sent to the sequencer.
- *  4. The sequencer verifies the proof on-chain using the stored VK.
- *  5. The returned bank_id is the only information revealed — everything
- *     else (card number, expiry, credit limit) stays private.
+ *     locally in your PXE — no transaction is submitted.
+ *  3. The circuit verifies: you own a note from that bank AND the card is not expired.
+ *  4. Success means the constraints held. Nothing is revealed to the network.
  *
  * This is "selective disclosure": you prove a property of your private data
  * without revealing the data itself.
@@ -19,7 +17,7 @@
 import { useState } from "react";
 
 interface ProveOwnershipProps {
-  onProve: (bankId: string) => Promise<string>;
+  onProve: (bankId: string) => Promise<void>;
   isLoading: boolean;
   defaultBankId?: string;
 }
@@ -33,17 +31,14 @@ export function ProveOwnership({
 }: ProveOwnershipProps) {
   const [bankId, setBankId] = useState(defaultBankId);
   const [status, setStatus] = useState<ProofStatus>("idle");
-  const [proofResult, setProofResult] = useState<string>("");
   const [errorMsg, setErrorMsg] = useState<string>("");
 
   async function handleProve() {
     if (!bankId) return;
     setStatus("proving");
-    setProofResult("");
     setErrorMsg("");
     try {
-      const result = await onProve(bankId);
-      setProofResult(result);
+      await onProve(bankId);
       setStatus("success");
     } catch (err) {
       setErrorMsg(err instanceof Error ? err.message : String(err));
@@ -63,6 +58,7 @@ export function ProveOwnership({
         <ul className="space-y-0.5 list-disc list-inside">
           <li>You possess a card note from the specified bank</li>
           <li>The note exists in the global note-hash tree</li>
+          <li>The card has not expired</li>
         </ul>
         <p className="font-semibold text-gray-300 mt-2">What stays private:</p>
         <ul className="space-y-0.5 list-disc list-inside text-indigo-300">
@@ -103,14 +99,15 @@ export function ProveOwnership({
       {status === "success" && (
         <div className="bg-green-900/30 border border-green-700 rounded-xl p-3 space-y-1 animate-fade-in">
           <p className="text-xs font-semibold text-green-300">
-            Proof verified on-chain!
+            Proof verified locally in PXE
           </p>
-          <p className="text-xs text-gray-400">Public output (bank_id):</p>
+          <p className="text-xs text-gray-400">Bank proved:</p>
           <p className="text-xs font-mono text-green-200 break-all">
-            {proofResult}
+            {bankId}
           </p>
           <p className="text-[10px] text-gray-500 mt-1">
-            This is the ONLY information revealed. Your card details remain private.
+            Circuit ran locally — card number, expiry and limit were never
+            revealed.
           </p>
         </div>
       )}

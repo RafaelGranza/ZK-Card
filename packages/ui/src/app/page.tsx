@@ -15,7 +15,10 @@ export default function Home() {
         <p className="text-gray-400 text-sm max-w-sm">
           Private credit card ownership proofs using{" "}
           <span className="text-indigo-400 font-medium">Aztec Notes</span> and{" "}
-          <span className="text-violet-400 font-medium">Zero-Knowledge proofs</span>.
+          <span className="text-violet-400 font-medium">
+            Zero-Knowledge proofs
+          </span>
+          .
         </p>
       </div>
 
@@ -26,7 +29,9 @@ export default function Home() {
         >
           <div className="text-3xl mb-2">🏦</div>
           <p className="font-semibold text-base">Bank Portal</p>
-          <p className="text-xs text-indigo-200 mt-1">Deploy contract, issue cards</p>
+          <p className="text-xs text-indigo-200 mt-1">
+            Deploy contract, issue cards
+          </p>
         </Link>
 
         <Link
@@ -35,7 +40,9 @@ export default function Home() {
         >
           <div className="text-3xl mb-2">💳</div>
           <p className="font-semibold text-base">Cardholder</p>
-          <p className="text-xs text-gray-400 mt-1">View cards, prove ownership</p>
+          <p className="text-xs text-gray-400 mt-1">
+            View cards, prove ownership
+          </p>
         </Link>
 
         <Link

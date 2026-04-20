@@ -11,19 +11,30 @@ import { loadContractArtifact } from "@aztec/stdlib/abi";
 import type { Wallet } from "@aztec/aztec.js/wallet";
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
-const ZKCardArtifact = loadContractArtifact(require("../../../contracts/target/zk_card-ZKCard.json"));
+const ZKCardArtifact = loadContractArtifact(
+  require("../../../contracts/target/zk_card-ZKCard.json"),
+);
 
 // Persist across hot reloads using global (standard Next.js dev pattern).
 const g = global as typeof global & {
   _zkContract: Contract | undefined;
 };
 
-function getStored(): Contract | null  { return g._zkContract ?? null; }
-function setStored(c: Contract | null) { g._zkContract = c ?? undefined; }
+function getStored(): Contract | null {
+  return g._zkContract ?? null;
+}
+function setStored(c: Contract | null) {
+  g._zkContract = c ?? undefined;
+}
 
 /** Deploys a new ZKCard contract. */
-export async function deployZKCard(wallet: Wallet, admin: AztecAddress): Promise<Contract> {
-  const { contract } = await Contract.deploy(wallet, ZKCardArtifact, [admin]).send({ from: admin });
+export async function deployZKCard(
+  wallet: Wallet,
+  admin: AztecAddress,
+): Promise<Contract> {
+  const { contract } = await Contract.deploy(wallet, ZKCardArtifact, [
+    admin,
+  ]).send({ from: admin });
   setStored(contract);
   return contract;
 }
@@ -32,10 +43,16 @@ export async function deployZKCard(wallet: Wallet, admin: AztecAddress): Promise
  * Attaches to an already-deployed ZKCard contract.
  * Registers the artifact with the PXE so private function simulations work.
  */
-export async function attachZKCard(address: string, wallet: Wallet): Promise<Contract> {
+export async function attachZKCard(
+  address: string,
+  wallet: Wallet,
+): Promise<Contract> {
   const addr = AztecAddress.fromString(address);
   const { instance } = await wallet.getContractMetadata(addr);
-  if (!instance) throw new Error(`No contract found at ${address}. Did the sandbox restart?`);
+  if (!instance)
+    throw new Error(
+      `No contract found at ${address}. Did the sandbox restart?`,
+    );
   await wallet.registerContract(instance, ZKCardArtifact);
   const c = Contract.at(addr, ZKCardArtifact, wallet);
   setStored(c);
@@ -45,7 +62,10 @@ export async function attachZKCard(address: string, wallet: Wallet): Promise<Con
 /** Returns the current contract or throws a clear error. */
 export function getContract(): Contract {
   const c = getStored();
-  if (!c) throw new Error("Contract not set. Click on the bottom right buttom to deploy it.");
+  if (!c)
+    throw new Error(
+      "Contract not set. Click on the bottom right buttom to deploy it.",
+    );
   return c;
 }
 

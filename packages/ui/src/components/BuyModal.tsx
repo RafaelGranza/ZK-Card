@@ -40,26 +40,35 @@ export function BuyModal({ onClose }: BuyModalProps) {
       }
     }
     init();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // If connect() fails internally (sets status="error" without throwing), show error
+  useEffect(() => {
+    if (aztec.status === "error") {
+      setErrorMsg(aztec.error ?? "Connection failed");
+      setStep("error");
+    }
+  }, [aztec.status, aztec.error]);
 
   // Once address is set, load cards and advance to select
   useEffect(() => {
     if (!aztec.address) return;
-    aztec.refreshCards()
+    aztec
+      .refreshCards()
       .then(() => setStep("select"))
       .catch((e) => {
         setErrorMsg(e instanceof Error ? e.message : String(e));
         setStep("error");
       });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [aztec.address]);
 
   async function handleSelectCard(card: CardNoteData) {
     setStep("proving");
     try {
-      const id = await aztec.proveOwnership(card.bankId);
-      setProvenBankId(id);
+      await aztec.proveOwnership(card.bankId);
+      setProvenBankId(card.bankId);
       setStep("success");
     } catch (e) {
       setErrorMsg(e instanceof Error ? e.message : String(e));
@@ -69,7 +78,10 @@ export function BuyModal({ onClose }: BuyModalProps) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
+      <div
+        className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+        onClick={onClose}
+      />
 
       <div className="relative z-10 bg-gray-900 border border-gray-700 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
         {/* Header */}
@@ -82,18 +94,22 @@ export function BuyModal({ onClose }: BuyModalProps) {
               Verify ownership to claim
             </span>
           </div>
-          <button onClick={onClose} className="text-gray-500 hover:text-gray-300 text-xl leading-none">
+          <button
+            onClick={onClose}
+            className="text-gray-500 hover:text-gray-300 text-xl leading-none"
+          >
             ×
           </button>
         </div>
 
         {/* Body */}
         <div className="px-6 py-6 min-h-52">
-
           {/* STEP: loading */}
           {step === "loading" && (
             <div className="flex items-center justify-center py-10">
-              <p className="text-indigo-400 text-sm animate-pulse">Connecting wallet…</p>
+              <p className="text-indigo-400 text-sm animate-pulse">
+                Connecting wallet…
+              </p>
             </div>
           )}
 
@@ -101,7 +117,8 @@ export function BuyModal({ onClose }: BuyModalProps) {
           {step === "select" && (
             <div className="space-y-4">
               <p className="text-gray-400 text-sm">
-                Select a card to prove ownership. No card details will be shared.
+                Select a card to prove ownership. No card details will be
+                shared.
               </p>
 
               {aztec.cards.length === 0 && (
@@ -115,7 +132,11 @@ export function BuyModal({ onClose }: BuyModalProps) {
 
               <div className="space-y-2">
                 {aztec.cards.map((card, i) => (
-                  <CardRow key={i} card={card} onClick={() => handleSelectCard(card)} />
+                  <CardRow
+                    key={i}
+                    card={card}
+                    onClick={() => handleSelectCard(card)}
+                  />
                 ))}
               </div>
             </div>
@@ -127,7 +148,9 @@ export function BuyModal({ onClose }: BuyModalProps) {
               <div className="relative w-14 h-14">
                 <div className="absolute inset-0 rounded-full border-4 border-indigo-900" />
                 <div className="absolute inset-0 rounded-full border-4 border-t-indigo-500 animate-spin" />
-                <div className="absolute inset-0 flex items-center justify-center text-lg">🔐</div>
+                <div className="absolute inset-0 flex items-center justify-center text-lg">
+                  🔐
+                </div>
               </div>
               <div className="text-center space-y-1">
                 <p className="text-white font-semibold">Generating ZK proof…</p>
@@ -147,7 +170,9 @@ export function BuyModal({ onClose }: BuyModalProps) {
                 </div>
                 <div>
                   <p className="text-white font-semibold">Ownership verified</p>
-                  <p className="text-gray-500 text-xs">Card details were never revealed.</p>
+                  <p className="text-gray-500 text-xs">
+                    Card details were never revealed.
+                  </p>
                 </div>
               </div>
 
@@ -158,7 +183,12 @@ export function BuyModal({ onClose }: BuyModalProps) {
                 </div>
                 <div className="text-indigo-300 truncate">{provenBankId}</div>
                 <div className="border-t border-gray-700 pt-2 space-y-1">
-                  {["card_number_hash", "expiry_year", "expiry_month", "credit_limit"].map((f) => (
+                  {[
+                    "card_number_hash",
+                    "expiry_year",
+                    "expiry_month",
+                    "credit_limit",
+                  ].map((f) => (
                     <div key={f} className="flex justify-between">
                       <span className="text-gray-500">{f}</span>
                       <span className="text-gray-600">hidden</span>
@@ -181,11 +211,18 @@ export function BuyModal({ onClose }: BuyModalProps) {
           {step === "error" && (
             <div className="space-y-4">
               <div className="bg-red-900/20 border border-red-800 rounded-xl p-4">
-                <p className="text-red-400 text-sm font-semibold mb-1">Failed</p>
-                <p className="text-red-300 text-xs font-mono break-all">{errorMsg}</p>
+                <p className="text-red-400 text-sm font-semibold mb-1">
+                  Failed
+                </p>
+                <p className="text-red-300 text-xs font-mono break-all">
+                  {errorMsg}
+                </p>
               </div>
               <button
-                onClick={() => { setErrorMsg(null); setStep("select"); }}
+                onClick={() => {
+                  setErrorMsg(null);
+                  setStep("select");
+                }}
                 className="w-full bg-gray-800 hover:bg-gray-700 border border-gray-700 text-white py-3 rounded-xl text-sm"
               >
                 Try again
@@ -206,7 +243,13 @@ export function BuyModal({ onClose }: BuyModalProps) {
   );
 }
 
-function CardRow({ card, onClick }: { card: CardNoteData; onClick: () => void }) {
+function CardRow({
+  card,
+  onClick,
+}: {
+  card: CardNoteData;
+  onClick: () => void;
+}) {
   const gradient = bankGradient(card.bankId);
   const last4 = card.cardNumberHash.slice(-4).toUpperCase();
   const expiry = `${String(card.expiryMonth).padStart(2, "0")}/${String(card.expiryYear).slice(-2)}`;
@@ -217,8 +260,12 @@ function CardRow({ card, onClick }: { card: CardNoteData; onClick: () => void })
       className="w-full flex items-center gap-4 bg-gray-800 hover:bg-gray-750 border border-gray-700 hover:border-indigo-500 rounded-xl p-3 transition-all group text-left"
     >
       {/* Mini card chip */}
-      <div className={`w-12 h-8 rounded-lg bg-gradient-to-br ${gradient} flex-shrink-0 flex items-center justify-center`}>
-        <span className="text-white text-[9px] font-bold tracking-wider">ZK</span>
+      <div
+        className={`w-12 h-8 rounded-lg bg-gradient-to-br ${gradient} flex-shrink-0 flex items-center justify-center`}
+      >
+        <span className="text-white text-[9px] font-bold tracking-wider">
+          ZK
+        </span>
       </div>
 
       <div className="flex-1 min-w-0">
