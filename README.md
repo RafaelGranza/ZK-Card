@@ -50,11 +50,11 @@ sequenceDiagram
 
 ## Stack
 
-- **Contract**: Noir + aztec-nr `v4.2.0-aztecnr-rc.2` — core of the prototype
+- **Contract**: Noir + aztec-nr `v4.2.0` — core of the prototype
 - **UI**: Next.js 16 + Tailwind CSS — demo interface only
 - **Network**: Aztec sandbox (local)
 
-> **Toolchain**: contract uses aztec-nr `v4.2.0-aztecnr-rc.2` (Nargo.toml); UI packages use `@aztec/* 4.2.0-aztecnr-rc.2`. Run `aztec --version` to confirm your local CLI matches before compiling.
+> **Toolchain**: contract uses aztec-nr `v4.2.0` (Nargo.toml); UI packages use `@aztec/* 4.2.0`. Run `aztec --version` to confirm your local CLI matches before compiling.
 
 ## Running locally
 

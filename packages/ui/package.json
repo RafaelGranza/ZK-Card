@@ -10,11 +10,11 @@
     "format": "prettier --write ."
   },
   "dependencies": {
-    "@aztec/accounts": "4.2.0-aztecnr-rc.2",
-    "@aztec/aztec.js": "4.2.0-aztecnr-rc.2",
-    "@aztec/pxe": "4.2.0-aztecnr-rc.2",
-    "@aztec/wallet-sdk": "4.2.0-aztecnr-rc.2",
-    "@aztec/wallets": "4.2.0-aztecnr-rc.2",
+    "@aztec/accounts": "4.2.0",
+    "@aztec/aztec.js": "4.2.0",
+    "@aztec/pxe": "4.2.0",
+    "@aztec/wallet-sdk": "4.2.0",
+    "@aztec/wallets": "4.2.0",
     "next": "16.2.3",
     "react": "^19.2.5",
     "react-dom": "^19.2.5"
